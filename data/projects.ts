@@ -1,0 +1,563 @@
+// Primary projects. Every number here was counted from the repository itself
+// (controllers, entities, routes, screens, commits) — nothing is estimated.
+
+export type Layer = {
+  kind: "backend" | "frontend" | "mobile" | "infra";
+  title: string;
+  points: string[];
+  tech: string;
+};
+
+export type Project = {
+  slug: string;
+  code: string; // P/01
+  name: string;
+  kicker: string;
+  tagline: string; // one line on the card
+  problem: string; // two sentences on the case study
+  role: string;
+  timeline: string;
+  platforms: string;
+  live?: string;
+  liveLabel?: string;
+  source?: string;
+  privateRepo?: boolean;
+  badge?: string; // honesty label, e.g. "Team project"
+  note?: string; // honesty note on the case study
+  visual: "dashboard" | "tenants" | "phones" | "layers" | "pipeline" | "storefront" | "form";
+  tags: { label: string; tone: "lime" | "blue" | "white" | "grey" }[];
+  proof: { value: string; label: string }[]; // shown on the card + case study
+  layers: Layer[];
+  decisions: { title: string; body: string }[];
+  apiChip: string;
+};
+
+export const projects: Project[] = [
+  {
+    slug: "onekampus",
+    code: "P/01",
+    name: "oneKampus",
+    kicker: "education platform · api + web + mobile",
+    tagline:
+      "One platform for schools and coaching institutes — institute management, an LMS with payments, proctored exams and hiring — on web and mobile with a single sign-in.",
+    problem:
+      "Institutes juggle separate tools for admissions, fees, classes, exams and hiring, and none of them talk to each other. oneKampus puts all four in one product, with one login across a web app and a mobile app.",
+    role: "Founder · sole engineer",
+    timeline: "Oct 2026 — present · 219 commits",
+    platforms: "Web · iOS · Android",
+    privateRepo: true,
+    visual: "dashboard",
+    tags: [
+      { label: "Spring Boot 4", tone: "blue" },
+      { label: "Spring Modulith", tone: "blue" },
+      { label: "Next.js 16", tone: "lime" },
+      { label: "React Native", tone: "white" },
+      { label: "PostgreSQL 17", tone: "grey" },
+      { label: "AWS S3", tone: "grey" },
+    ],
+    proof: [
+      { value: "387", label: "REST endpoints" },
+      { value: "108", label: "JPA entities" },
+      { value: "65 + 31", label: "web pages + mobile screens" },
+      { value: "4", label: "product modules" },
+    ],
+    layers: [
+      {
+        kind: "backend",
+        title: "Spring Boot modular monolith",
+        points: [
+          "Four modules — IMS, LMS, Exams, Hiring — each with its own Postgres schema, connection pool and Flyway history",
+          "Single sign-on: one JWT carries institute and LMS claims, valid across every module",
+          "Stripe checkout with signed webhooks; S3 storage via AWS SDK v2",
+          "Exam engine with auto + manual grading, ranks and percentiles",
+          "Modulith boundary tests keep modules from leaking into each other",
+        ],
+        tech: "Java 17 · Spring Boot 4.1 · Modulith 2.0 · Security · JPA · Flyway · springdoc",
+      },
+      {
+        kind: "frontend",
+        title: "Next.js web app",
+        points: [
+          "65 pages: admin, teacher, student and parent portals",
+          "Full-screen proctored exam player",
+          "Live video interviews over WebRTC, plus recorded-answer interviews with MediaRecorder",
+          "HLS video lessons with hls.js",
+        ],
+        tech: "Next.js 16 · React 19 · MUI 7 · Redux Toolkit · TanStack Query",
+      },
+      {
+        kind: "mobile",
+        title: "React Native app",
+        points: [
+          "31 screens sharing the same API and login",
+          "Video lessons, attendance, fees and results on the phone",
+          "Server state cached with TanStack Query",
+        ],
+        tech: "React Native 0.88 · React Navigation 7 · react-native-video",
+      },
+      {
+        kind: "infra",
+        title: "CI and deployment",
+        points: [
+          "GitHub Actions runs 34 test classes on embedded Postgres, builds Docker images, ships over SSH",
+          "JVM tuned for a 1 GB box (256 MB heap, C1 JIT) — measured ~410 MB under load",
+          "Caddy behind Cloudflare with origin certificates and real-IP rate limiting",
+        ],
+        tech: "Docker Compose · Caddy · Cloudflare · AWS Lightsail · GitHub Actions",
+      },
+    ],
+    decisions: [
+      {
+        title: "A modular monolith, not microservices",
+        body: "One deploy and in-process calls keep a solo-run product cheap and debuggable. Boundaries are enforced by Modulith tests instead of the network, so any module can be extracted later.",
+      },
+      {
+        title: "A Postgres schema per module",
+        body: "Each module owns its tables and migrations, which isolates change and makes extraction possible. The cost: no cross-schema foreign keys and four connection pools on a small server.",
+      },
+      {
+        title: "WebRTC signalling over HTTP polling",
+        body: "Polling every second through the existing API avoided running a WebSocket server behind Cloudflare and Caddy. It trades a little latency and request load for much simpler infrastructure.",
+      },
+    ],
+    apiChip: "POST /api/v1/exams/attempts → 201",
+  },
+  {
+    slug: "site-auto-matrix",
+    code: "P/02",
+    name: "site-auto-matrix",
+    kicker: "multi-tenant website platform",
+    tagline:
+      "One Next.js deployment that creates, hosts and manages many client websites — each on its own subdomain or custom domain, with HTTPS issued automatically.",
+    problem:
+      "Small schools, shops and companies need a website but can't run one. This platform lets an agency spin up a site from a blueprint, hand the client a login, and host everything on one cheap server.",
+    role: "Sole engineer",
+    timeline: "Oct — Nov 2026 · 29 commits",
+    platforms: "Web",
+    live: "https://sites.onekampus.com",
+    liveLabel: "sites.onekampus.com",
+    source: "https://github.com/Ritiksharmaji/site-auto-matrix",
+    visual: "tenants",
+    tags: [
+      { label: "Next.js 15", tone: "lime" },
+      { label: "Prisma", tone: "grey" },
+      { label: "PostgreSQL 17", tone: "grey" },
+      { label: "Caddy TLS", tone: "blue" },
+    ],
+    proof: [
+      { value: "29", label: "website blueprints" },
+      { value: "13", label: "Prisma models" },
+      { value: "37", label: "server actions" },
+      { value: "$7", label: "a month to host them all" },
+    ],
+    layers: [
+      {
+        kind: "backend",
+        title: "Platform core",
+        points: [
+          "Hostname routing in middleware: <slug>.onekampus.com or a custom domain → that tenant's site",
+          "Three roles — Super Admin, Team Member, Client — enforced server-side",
+          "Enquiry form with per-IP rate limiting, then email + WhatsApp alerts via the Meta Graph API",
+          "INR billing cycles and invoices with a cron route",
+        ],
+        tech: "Next.js 15 server actions · Prisma 6 · Zod · jose JWT · Nodemailer",
+      },
+      {
+        kind: "frontend",
+        title: "Admin, client portal and Code Studio",
+        points: [
+          "Design tab for colours, fonts, header/footer and per-section layouts",
+          "Code Studio: Monaco editor with instant React preview compiled in the browser by esbuild-wasm",
+          "Per-site analytics, sitemap.xml and robots.txt",
+        ],
+        tech: "React 19 · Tailwind 4 · Monaco · esbuild-wasm",
+      },
+      {
+        kind: "infra",
+        title: "Hosting and code deploys",
+        points: [
+          "Caddy on-demand TLS: certificates issued only for hosts the app approves",
+          "Code sites deploy from GitHub Actions through an HMAC-verified webhook, versioned with rollback",
+          "Runs on a 1 GB Lightsail box: Postgres and Node memory tuned by hand",
+        ],
+        tech: "Docker Compose · Caddy · PostgreSQL 17 · AWS Lightsail",
+      },
+    ],
+    decisions: [
+      {
+        title: "One deployment for every tenant",
+        body: "Routing on the Host header means one app serves every client site — a single $7/month box. The trade-off is a shared failure domain, which suits small sites.",
+      },
+      {
+        title: "Content as JSONB, sections as config",
+        body: "A new kind of website needs no migration, just a new config module. Less relational integrity, so validation happens in Zod instead of the database.",
+      },
+      {
+        title: "Code sites isolated on their own origin",
+        body: "Client-written React runs only on its own host, never next to the admin panel — so a client's JavaScript can never touch an admin session.",
+      },
+    ],
+    apiChip: "GET /api/caddy/ask?domain=… → 200",
+  },
+  {
+    slug: "music-app",
+    code: "P/03",
+    name: "Music streaming app",
+    kicker: "real-time music · web + mobile",
+    tagline:
+      "Spotify-style streaming with live “listening now” presence and chat, an admin studio, and a native mobile player — self-hosted on three subdomains.",
+    problem:
+      "A music app where friends can see what each other are playing in real time and message about it. It streams uploaded songs from S3 and a catalogue pulled from YouTube and Jamendo.",
+    role: "Extended an open-source base",
+    timeline: "Nov 2026 · 8 of 11 commits",
+    platforms: "Web · iOS · Android",
+    live: "https://music.onekampus.com",
+    liveLabel: "music.onekampus.com",
+    source: "https://github.com/Ritiksharmaji/music-app",
+    badge: "Built on open source",
+    note: "Started from an open-source realtime Spotify-clone tutorial. My work: the entire React Native app, moving storage from Cloudinary to S3 and auth from Clerk to JWT, three external catalogues, the catalogue cache, and the production deployment.",
+    visual: "phones",
+    tags: [
+      { label: "React Native", tone: "white" },
+      { label: "Socket.IO", tone: "blue" },
+      { label: "Express", tone: "blue" },
+      { label: "AWS S3", tone: "grey" },
+    ],
+    proof: [
+      { value: "23", label: "REST endpoints" },
+      { value: "10", label: "mobile screens" },
+      { value: "3", label: "live subdomains" },
+      { value: "24 h", label: "catalogue cache" },
+    ],
+    layers: [
+      {
+        kind: "backend",
+        title: "Express + Socket.IO API",
+        points: [
+          "Real-time presence, activity broadcast and DMs stored in MongoDB",
+          "Songs and albums in S3, served through 1-hour presigned URLs",
+          "YouTube and Jamendo catalogues with a stale-on-error disk cache",
+        ],
+        tech: "Express 4 · Socket.IO 4 · Mongoose 8 · AWS SDK v3 · node-cron",
+      },
+      {
+        kind: "mobile",
+        title: "React Native player",
+        points: [
+          "One player interface driving either TrackPlayer or a YouTube WebView",
+          "Home, Search, Album, Library, Now Playing, Chat and a mini-player",
+          "Background playback with lock-screen controls",
+        ],
+        tech: "React Native 0.88 · react-native-track-player · Zustand",
+      },
+      {
+        kind: "infra",
+        title: "Self-hosted deployment",
+        points: [
+          "App, admin and API on separate subdomains behind Caddy auto-HTTPS",
+          "Mongo cache capped at 0.25 GB to fit a 1 GB server",
+          "One-command rsync + docker compose deploy script",
+        ],
+        tech: "Docker · Caddy 2 · MongoDB 7 · AWS Lightsail",
+      },
+    ],
+    decisions: [
+      {
+        title: "Cache the catalogue for a day",
+        body: "Each YouTube category costs ~101 of 10,000 free daily quota units. A 24-hour on-disk cache that serves stale data on provider failure keeps the app inside the free tier.",
+      },
+      {
+        title: "One player, two engines",
+        body: "A single interface switches between native TrackPlayer and a YouTube WebView, giving full-length playback without breaking YouTube's terms — at the cost of two playback paths.",
+      },
+      {
+        title: "In-memory presence on one box",
+        body: "Presence lives in a Map in one container: simple and instant. Scaling past one instance would need a Redis adapter, a known next step.",
+      },
+    ],
+    apiChip: "socket.emit('update_activity') ✓",
+  },
+  {
+    slug: "ecommerce",
+    code: "P/04",
+    name: "Shopvra",
+    kicker: "commerce backend · web + mobile",
+    tagline:
+      "A store with one TypeScript Express API serving a React web shop and an Expo mobile app — Stripe with verified webhooks, plus a Spring Boot microservices version in progress.",
+    problem:
+      "An online store that works the same on web and phone, with admin tools on mobile. The API contract is fixed so a second backend — the Spring Boot microservices version — can be swapped in by changing one URL.",
+    role: "Sole engineer",
+    timeline: "Feb — Oct 2026 · 48 commits",
+    platforms: "Web · Android",
+    live: "https://shopvra.space",
+    liveLabel: "shopvra.space",
+    source: "https://github.com/Ritiksharmaji/Ecommerce-Application",
+    badge: "Spring version in progress",
+    note: "The shipped backend is Express + TypeScript. The Spring Boot microservices version (user, product and order services, each with its own PostgreSQL database) lives in a separate repo and is in progress — no gateway or message broker yet.",
+    visual: "layers",
+    tags: [
+      { label: "Express 5 + TS", tone: "blue" },
+      { label: "Spring Boot 3", tone: "blue" },
+      { label: "Expo", tone: "white" },
+      { label: "Stripe", tone: "lime" },
+      { label: "MongoDB", tone: "grey" },
+    ],
+    proof: [
+      { value: "27", label: "REST endpoints" },
+      { value: "16 + 12", label: "mobile screens + web pages" },
+      { value: "3", label: "Spring services, DB-per-service" },
+      { value: "5", label: "images per product (Cloudinary)" },
+    ],
+    layers: [
+      {
+        kind: "backend",
+        title: "Express API (shipped)",
+        points: [
+          "JWT auth with an admin role guard",
+          "Stripe Checkout + signed webhook, mounted with a raw body so the signature verifies",
+          "Cart, wishlist, addresses, orders and admin stats",
+          "Legacy-order mapper so two backends can share one database",
+        ],
+        tech: "Express 5 · TypeScript · Mongoose 9 · Stripe 20 · Cloudinary · Multer",
+      },
+      {
+        kind: "backend",
+        title: "Spring Boot microservices (in progress)",
+        points: [
+          "user-service :8081, product-service :8082, order-service :8083",
+          "Database per service on PostgreSQL, run with Docker Compose",
+          "Actuator health on every service",
+        ],
+        tech: "Java 21 · Spring Boot 3.5 · Spring Data JPA · PostgreSQL · Docker",
+      },
+      {
+        kind: "mobile",
+        title: "Expo mobile app",
+        points: [
+          "16 screens including an admin console: add/edit products, manage orders",
+          "Stripe payment inside a WebView; tokens in SecureStore",
+          "EAS builds for APK preview and AAB production",
+        ],
+        tech: "Expo 54 · Expo Router · NativeWind · SecureStore",
+      },
+      {
+        kind: "frontend",
+        title: "React web shop",
+        points: ["12 pages: catalogue, product, cart, checkout, orders", "Shared API client with token handling"],
+        tech: "React 18 · Vite · React Router · Tailwind",
+      },
+    ],
+    decisions: [
+      {
+        title: "Fix the contract, swap the backend",
+        body: "Both clients talk to one API shape, so moving from Express to Spring Boot services means changing a base URL, not the apps.",
+      },
+      {
+        title: "Server-verified payments",
+        body: "Stripe hosted Checkout plus a signed webhook makes the server the source of truth for “paid” — never the client redirect.",
+      },
+      {
+        title: "Own auth instead of a vendor",
+        body: "Moved from Clerk to in-house JWT to remove a paid dependency, taking on password hashing and token handling in exchange.",
+      },
+    ],
+    apiChip: "POST /api/stripe (webhook) → 200",
+  },
+  {
+    slug: "job-portal",
+    code: "P/05",
+    name: "Jobify — Job Portal",
+    kicker: "hiring platform · api + web + mobile",
+    tagline:
+      "Applicants and employers on one platform: post jobs with a rich-text editor, apply with a résumé, and move candidates through an interview pipeline — on web and mobile.",
+    problem:
+      "Small companies need a simple way to post roles and track applicants, and candidates want to apply from their phone. Jobify covers both sides with one Spring Boot API.",
+    role: "Sole engineer",
+    timeline: "Feb — Aug 2026 · 6 merged PRs",
+    platforms: "Web · iOS · Android",
+    live: "https://www.jobpilotai.site",
+    liveLabel: "jobpilotai.site",
+    source: "https://github.com/Ritiksharmaji/JOB-PORTAL-PROJECT",
+    visual: "pipeline",
+    tags: [
+      { label: "Spring Boot 3", tone: "blue" },
+      { label: "MongoDB", tone: "grey" },
+      { label: "React + TS", tone: "lime" },
+      { label: "React Native", tone: "white" },
+    ],
+    proof: [
+      { value: "19", label: "REST endpoints" },
+      { value: "17", label: "screens per mobile app" },
+      { value: "4", label: "pipeline stages" },
+      { value: "5 min", label: "OTP expiry, auto-purged" },
+    ],
+    layers: [
+      {
+        kind: "backend",
+        title: "Spring Boot API",
+        points: [
+          "BCrypt + JWT login with account type in the token claims",
+          "Password reset by emailed OTP; a scheduled job purges OTPs older than 5 minutes",
+          "Applicant pipeline: Applied → Interviewing → Offered / Rejected, with interview times",
+          "In-app notifications when jobs are posted or interviews scheduled",
+        ],
+        tech: "Spring Boot 3.3 · Spring Security · Spring Data MongoDB · JavaMail · Docker",
+      },
+      {
+        kind: "frontend",
+        title: "React web app",
+        points: [
+          "Employer job editor with Tiptap rich text and drafts",
+          "Find Jobs / Find Talent with filters and sorting",
+          "Axios interceptor attaches tokens and logs out on 401",
+        ],
+        tech: "React 18 · TypeScript · Redux Toolkit · Mantine · Tiptap",
+      },
+      {
+        kind: "mobile",
+        title: "React Native apps",
+        points: [
+          "17 screens, résumé upload with the document picker",
+          "Built in Expo, then ported to a bare React Native CLI app",
+        ],
+        tech: "Expo 51 · React Native CLI · React Navigation 6",
+      },
+    ],
+    decisions: [
+      {
+        title: "Applicants embedded in the job",
+        body: "Embedding applications in the Job document keeps reads to one query. Documents grow with applicants, so history uses a nested query.",
+      },
+      {
+        title: "Files stored in MongoDB",
+        body: "Résumés and photos live as binary in Mongo: zero extra infrastructure, bounded by the 16 MB document limit. Object storage is the next step.",
+      },
+      {
+        title: "Feature branches into develop",
+        body: "Work flowed through feature branches into develop into main, across 6 merged pull requests.",
+      },
+    ],
+    apiChip: "PUT /jobs/changeAppStatus → 200",
+  },
+  {
+    slug: "food-order",
+    code: "P/06",
+    name: "Food Order",
+    kicker: "food delivery · MERN",
+    tagline:
+      "A food-delivery storefront with Stripe and cash-on-delivery checkout, a server-side cart, order tracking and a separate admin panel.",
+    problem:
+      "Customers browse a menu, pay online or on delivery, and track their order; staff manage the menu and order status from an admin panel.",
+    role: "Sole engineer",
+    timeline: "Jul 2026",
+    platforms: "Web",
+    live: "https://food-order-application-chi.vercel.app",
+    liveLabel: "food-order-application-chi.vercel.app",
+    source: "https://github.com/Ritiksharmaji/Food-Order-Application",
+    visual: "storefront",
+    tags: [
+      { label: "Express", tone: "blue" },
+      { label: "MongoDB", tone: "grey" },
+      { label: "React + Vite", tone: "lime" },
+      { label: "Stripe", tone: "lime" },
+    ],
+    proof: [
+      { value: "14", label: "REST endpoints" },
+      { value: "11 + 3", label: "store + admin routes" },
+      { value: "2", label: "payment methods" },
+    ],
+    layers: [
+      {
+        kind: "backend",
+        title: "Express API",
+        points: [
+          "JWT + bcrypt auth; server-side cart on the user",
+          "Stripe Checkout sessions in INR with a delivery line, plus cash on delivery",
+          "Image uploads with Multer for menu items",
+        ],
+        tech: "Express 4 · Mongoose 8 · Stripe · Multer · Render",
+      },
+      {
+        kind: "frontend",
+        title: "Storefront + admin",
+        points: ["Menu by category, food and restaurant pages, My Orders", "Admin: add/list food, update order status"],
+        tech: "React 18 · Vite 5 · React Router 6 · Vercel",
+      },
+    ],
+    decisions: [
+      {
+        title: "Two apps, one API",
+        body: "Storefront and admin are separate Vite apps on one API, so the admin bundle never ships to customers.",
+      },
+      {
+        title: "Cart on the server",
+        body: "Keeping the cart on the user document means it follows the customer across devices.",
+      },
+      {
+        title: "Free-tier deploy",
+        body: "API on Render via a blueprint, storefront on Vercel — zero hosting cost for a demo.",
+      },
+    ],
+    apiChip: "POST /api/order/place → 200",
+  },
+  {
+    slug: "seed-grant",
+    code: "P/07",
+    name: "Seed Grant Management",
+    kicker: "university portal · team project",
+    tagline:
+      "A university portal for faculty seed-grant proposals and board review. I built the proposal form's client-side validation and restyled the form navigation hub.",
+    problem:
+      "Faculty submitted research grant proposals on paper. The team built a multi-step online form with review trails for admins and the review board.",
+    role: "Frontend contributor (team of 4)",
+    timeline: "Sep 2024",
+    platforms: "Web",
+    privateRepo: true,
+    badge: "Team project",
+    note: "A four-person university team project. My contributions (2 merged PRs): character counters and length limits on the proposal and deliverables forms, and a restyled navigation hub for the multi-step form.",
+    visual: "form",
+    tags: [
+      { label: "Java", tone: "blue" },
+      { label: "JSP / Servlets", tone: "blue" },
+      { label: "MySQL", tone: "grey" },
+    ],
+    proof: [
+      { value: "9", label: "form steps" },
+      { value: "2", label: "PRs merged" },
+    ],
+    layers: [
+      {
+        kind: "frontend",
+        title: "My part",
+        points: [
+          "Live character counters and 2,000-character limits on long-form answers",
+          "Restyled controller page that moves users through the 9 form steps",
+        ],
+        tech: "JSP · JavaScript · CSS",
+      },
+      {
+        kind: "backend",
+        title: "Team stack",
+        points: ["Servlets on Tomcat with MySQL", "PDF generation with iText and PDFBox", "Email via JavaMail"],
+        tech: "Java · Servlets · MySQL · iText",
+      },
+    ],
+    decisions: [
+      {
+        title: "Validate before the server",
+        body: "Counting characters as faculty type avoids losing a long answer to a server-side rejection.",
+      },
+      {
+        title: "One hub for many steps",
+        body: "A single navigation page shows progress across all nine sections, so a proposal can be filled in over several sittings.",
+      },
+      {
+        title: "Small, reviewable PRs",
+        body: "Changes went in as focused pull requests reviewed by teammates.",
+      },
+    ],
+    apiChip: "POST /FirstServlet → 302",
+  },
+];
+
+export const getProject = (slug: string) => projects.find((p) => p.slug === slug);

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 400" role="img" aria-label="Placeholder avatar">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0E1A3A"/>
+      <stop offset="1" stop-color="#060912"/>
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1558C9"/>
+      <stop offset="1" stop-color="#0D3A8A"/>
+    </linearGradient>
+  </defs>
+  <rect width="360" height="400" fill="url(#bg)"/>
+  <circle cx="180" cy="170" r="140" fill="#D4FF24" opacity=".06"/>
+  <circle cx="180" cy="170" r="100" fill="none" stroke="#D4FF24" stroke-opacity=".25" stroke-dasharray="4 8"/>
+  <!-- shoulders / shirt -->
+  <path d="M60 400c4-70 50-108 120-108s116 38 120 108z" fill="url(#shirt)"/>
+  <path d="M150 296l30 34 30-34" fill="none" stroke="#ECEDF3" stroke-width="5" stroke-linejoin="round"/>
+  <!-- neck -->
+  <path d="M158 248h44v46c0 12-44 12-44 0z" fill="#C98A62"/>
+  <!-- head -->
+  <ellipse cx="180" cy="190" rx="62" ry="72" fill="#D99A70"/>
+  <ellipse cx="118" cy="196" rx="10" ry="16" fill="#C98A62"/>
+  <ellipse cx="242" cy="196" rx="10" ry="16" fill="#C98A62"/>
+  <!-- hair -->
+  <path d="M116 180c-6-58 30-92 70-90 46 2 72 34 66 88-8-26-26-40-48-46-22 14-58 20-88 48z" fill="#17120F"/>
+  <!-- glasses -->
+  <g fill="none" stroke="#030407" stroke-width="4">
+    <rect x="136" y="186" width="36" height="26" rx="9"/>
+    <rect x="188" y="186" width="36" height="26" rx="9"/>
+    <path d="M172 198h16"/>
+  </g>
+  <circle cx="154" cy="200" r="4" fill="#17120F"/>
+  <circle cx="206" cy="200" r="4" fill="#17120F"/>
+  <!-- beard + smile -->
+  <path d="M130 214c6 44 26 58 50 58s44-14 50-58c-10 18-26 22-50 22s-40-4-50-22z" fill="#17120F" opacity=".85"/>
+  <path d="M164 236c10 8 22 8 32 0" fill="none" stroke="#D99A70" stroke-width="4" stroke-linecap="round"/>
+</svg>
