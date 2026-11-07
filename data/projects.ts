@@ -25,6 +25,7 @@ export type Project = {
   badge?: string; // honesty label, e.g. "Team project"
   note?: string; // honesty note on the case study
   visual: "dashboard" | "tenants" | "phones" | "layers" | "pipeline" | "storefront" | "form";
+  shots?: { cover: string; caption: string; mobile?: string; gallery: { src: string; caption: string }[] };
   tags: { label: string; tone: "lime" | "blue" | "white" | "grey" }[];
   proof: { value: string; label: string }[]; // shown on the card + case study
   layers: Layer[];
@@ -47,6 +48,7 @@ export const projects: Project[] = [
     platforms: "Web · iOS · Android",
     privateRepo: true,
     visual: "dashboard",
+    shots: { cover: "/projects/onekampus/cover.jpg", caption: "Institute dashboard — admissions, fees, attendance", mobile: "/projects/onekampus/mobile.jpg", gallery: [{ src: "/projects/onekampus/lms-player.jpg", caption: "LMS — course player with HLS video" }, { src: "/projects/onekampus/exam-monitor.jpg", caption: "Exams — live proctoring monitor" }, { src: "/projects/onekampus/paper-builder.jpg", caption: "Exams — question paper builder" }, { src: "/projects/onekampus/hiring-board.jpg", caption: "Hiring — applicant pipeline board" }] },
     tags: [
       { label: "Spring Boot 4", tone: "blue" },
       { label: "Spring Modulith", tone: "blue" },
@@ -138,6 +140,7 @@ export const projects: Project[] = [
     liveLabel: "sites.onekampus.com",
     source: "https://github.com/Ritiksharmaji/site-auto-matrix",
     visual: "tenants",
+    shots: { cover: "/projects/site-auto-matrix/cover.jpg", caption: "Blueprint gallery — 29 ready-made websites", mobile: "/projects/site-auto-matrix/mobile.jpg", gallery: [{ src: "/projects/site-auto-matrix/code-studio.jpg", caption: "Code Studio — Monaco editor with instant in-browser preview" }, { src: "/projects/site-auto-matrix/client-site.jpg", caption: "A client site served on its own subdomain" }, { src: "/projects/site-auto-matrix/analytics.jpg", caption: "Per-site analytics in the builder" }] },
     tags: [
       { label: "Next.js 15", tone: "lime" },
       { label: "Prisma", tone: "grey" },
@@ -217,6 +220,7 @@ export const projects: Project[] = [
     badge: "Built on open source",
     note: "Started from an open-source realtime Spotify-clone tutorial. My work: the entire React Native app, moving storage from Cloudinary to S3 and auth from Clerk to JWT, three external catalogues, the catalogue cache, and the production deployment.",
     visual: "phones",
+    shots: { cover: "/projects/music-app/cover.jpg", caption: "Home — catalogue, uploads and live friends feed", gallery: [{ src: "/projects/music-app/chat.jpg", caption: "Real-time chat and “listening now” presence" }, { src: "/projects/music-app/playing.jpg", caption: "Full-length playback from the YouTube catalogue" }, { src: "/projects/music-app/admin.jpg", caption: "Admin studio — songs, albums and stats" }] },
     tags: [
       { label: "React Native", tone: "white" },
       { label: "Socket.IO", tone: "blue" },
@@ -295,6 +299,7 @@ export const projects: Project[] = [
     badge: "Spring version in progress",
     note: "The shipped backend is Express + TypeScript. The Spring Boot microservices version (user, product and order services, each with its own PostgreSQL database) lives in a separate repo and is in progress — no gateway or message broker yet.",
     visual: "layers",
+    shots: { cover: "/projects/ecommerce/cover.jpg", caption: "shopvra.space — live storefront", mobile: "/projects/ecommerce/mobile.jpg", gallery: [] },
     tags: [
       { label: "Express 5 + TS", tone: "blue" },
       { label: "Spring Boot 3", tone: "blue" },
@@ -366,12 +371,12 @@ export const projects: Project[] = [
   {
     slug: "job-portal",
     code: "P/05",
-    name: "Jobify — Job Portal",
+    name: "JobHook — Job Portal",
     kicker: "hiring platform · api + web + mobile",
     tagline:
       "Applicants and employers on one platform: post jobs with a rich-text editor, apply with a résumé, and move candidates through an interview pipeline — on web and mobile.",
     problem:
-      "Small companies need a simple way to post roles and track applicants, and candidates want to apply from their phone. Jobify covers both sides with one Spring Boot API.",
+      "Small companies need a simple way to post roles and track applicants, and candidates want to apply from their phone. JobHook covers both sides with one Spring Boot API.",
     role: "Sole engineer",
     timeline: "Feb — Aug 2026 · 6 merged PRs",
     platforms: "Web · iOS · Android",
@@ -379,6 +384,7 @@ export const projects: Project[] = [
     liveLabel: "jobpilotai.site",
     source: "https://github.com/Ritiksharmaji/JOB-PORTAL-PROJECT",
     visual: "pipeline",
+    shots: { cover: "/projects/job-portal/cover.jpg", caption: "jobpilotai.site — live job portal", mobile: "/projects/job-portal/mobile.jpg", gallery: [] },
     tags: [
       { label: "Spring Boot 3", tone: "blue" },
       { label: "MongoDB", tone: "grey" },
@@ -442,7 +448,7 @@ export const projects: Project[] = [
   {
     slug: "food-order",
     code: "P/06",
-    name: "Food Order",
+    name: "Tomato — Food Order",
     kicker: "food delivery · MERN",
     tagline:
       "A food-delivery storefront with Stripe and cash-on-delivery checkout, a server-side cart, order tracking and a separate admin panel.",
@@ -455,6 +461,7 @@ export const projects: Project[] = [
     liveLabel: "food-order-application-chi.vercel.app",
     source: "https://github.com/Ritiksharmaji/Food-Order-Application",
     visual: "storefront",
+    shots: { cover: "/projects/food-order/cover.jpg", caption: "Live storefront on Vercel", gallery: [] },
     tags: [
       { label: "Express", tone: "blue" },
       { label: "MongoDB", tone: "grey" },

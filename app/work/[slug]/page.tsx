@@ -4,8 +4,11 @@ import { notFound } from "next/navigation";
 import { projects, getProject, type Layer } from "@/data/projects";
 import { Nav } from "@/components/client";
 import { Footer } from "@/components/sections";
-import { ProjectVisual } from "@/components/visuals";
+import { ProjectMedia, Gallery } from "@/components/shots";
 import { ArrowLeft, Lock } from "@/components/icons";
+
+// Every slug is prerendered via generateStaticParams; unknown slugs 404, so blocking is fine.
+export const instant = false;
 
 export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
@@ -76,12 +79,14 @@ export default async function CaseStudy(props: PageProps<"/work/[slug]">) {
           )}
         </section>
 
-        <section className="wrap" aria-hidden="true" style={{ paddingTop: 16, paddingBottom: 64 }}>
+        <section className="wrap" style={{ paddingTop: 16, paddingBottom: 64 }}>
           <div style={{ borderRadius: 32, overflow: "hidden", border: "1px solid rgba(255,255,255,.08)", position: "relative" }}>
-            <ProjectVisual type={p.visual} />
+            <ProjectMedia p={p} variant="hero" />
             <div className="mono" style={{ position: "absolute", left: 20, top: 20, background: "rgba(10,15,30,.95)", border: "1px solid rgba(21,88,201,.9)", borderRadius: 12, padding: "10px 14px", fontSize: 13, color: "var(--blue-4)", boxShadow: "0 20px 40px rgba(0,0,0,.5)" }}>{p.apiChip}</div>
           </div>
         </section>
+
+        <Gallery p={p} />
 
         <section className="wrap section" style={{ paddingTop: 24 }}>
           <h2 className="h2" style={{ fontSize: "clamp(32px, 4vw, 56px)" }}>What I built, layer by layer.</h2>

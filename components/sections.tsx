@@ -3,7 +3,7 @@ import Image from "next/image";
 import { profile, heroStats, experience, education, certifications, achievements, githubStats } from "@/data/profile";
 import { projects, type Project } from "@/data/projects";
 import { marquee } from "@/data/stack";
-import { ProjectVisual } from "./visuals";
+import { ProjectMedia } from "./shots";
 import { StackTabs, LabGrid } from "./client";
 import { ArrowRight, ArrowUpRight, Download, Lock, IconFor } from "./icons";
 
@@ -262,8 +262,8 @@ function WideCard({ p, flip = false }: { p: Project; flip?: boolean }) {
         <Tags p={p} />
         <Links p={p} />
       </div>
-      <div aria-hidden="true" style={{ flex: "1.4 1 480px", minWidth: 0 }}>
-        <ProjectVisual type={p.visual} />
+      <div style={{ flex: "1.4 1 480px", minWidth: 0 }}>
+        <ProjectMedia p={p} variant="wide" />
       </div>
     </article>
   );
@@ -271,8 +271,8 @@ function WideCard({ p, flip = false }: { p: Project; flip?: boolean }) {
 function HalfCard({ p }: { p: Project }) {
   return (
     <article className="card" style={{ display: "flex", flexDirection: "column" }}>
-      <div aria-hidden="true">
-        <ProjectVisual type={p.visual} />
+      <div>
+        <ProjectMedia p={p} variant="half" />
       </div>
       <div style={{ padding: "clamp(24px, 3vw, 36px)", display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
         <Head p={p} />
@@ -291,8 +291,8 @@ function SlimCard({ p }: { p: Project }) {
         <Tags p={p} />
         <Links p={p} />
       </div>
-      <div aria-hidden="true" style={{ flex: "1 1 300px", minWidth: 0 }}>
-        <ProjectVisual type={p.visual} />
+      <div style={{ flex: "1 1 300px", minWidth: 0 }}>
+        <ProjectMedia p={p} variant="half" />
       </div>
     </article>
   );
@@ -339,7 +339,7 @@ const boxStyle = (s: string): React.CSSProperties => ({
   fontWeight: 600,
 });
 const principles = [
-  { t: "One API, every client", b: "Web and mobile share one contract, so both ship in parallel.", seen: "oneKampus · Shopvra · Jobify · Music" },
+  { t: "One API, every client", b: "Web and mobile share one contract, so both ship in parallel.", seen: "oneKampus · Shopvra · JobHook · Music" },
   { t: "Secure by default", b: "JWT with refresh, bcrypt, role guards, HMAC-verified webhooks and rate limits.", seen: "oneKampus · site-auto-matrix · Shopvra" },
   { t: "Boundaries before services", b: "Modules with their own schemas and boundary tests — split into services only when it pays.", seen: "oneKampus · Shopvra services" },
   { t: "Cheap to run", b: "Dockerised, tuned to fit 1 GB servers, deployed by CI or one script.", seen: "site-auto-matrix · Music · oneKampus" },
