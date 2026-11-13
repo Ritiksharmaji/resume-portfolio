@@ -44,5 +44,29 @@
         "Five flow guides"
       ]
     }
+  ],
+  "job-portal": [
+    {
+      "date": "2026-11-09",
+      "sha": "82ab25f",
+      "title": "Moved to AWS Lightsail and rebranded to JobPilot AI",
+      "points": [
+        "Spring Boot API deployed with Docker + Caddy HTTPS at jobs-api.onekampus.com",
+        "Web app moved to the shared Lightsail server, live at jobpilotai.site",
+        "Rebranded to JobPilot AI; removed placeholder content and template links",
+        "Fixed broken images on case-sensitive hosting"
+      ]
+    },
+    {
+      "date": "2026-10-04",
+      "sha": "7758932",
+      "title": "Express.js twin of the API, plus Angular and Next.js clients",
+      "points": [
+        "Express 5 + TypeScript backend as a drop-in replacement for the Spring Boot API",
+        "Stricter security: verified-OTP resets, ownership and role checks, rate limiting",
+        "Fixed Post Job payload in the Angular and Next.js apps",
+        "AWS deployment guide for the React app with custom domain and HTTPS"
+      ]
+    }
   ]
 }

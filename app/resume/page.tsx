@@ -10,11 +10,11 @@ export const metadata: Metadata = { title: "Résumé · Ritik Sharma" };
 const skills: [string, string][] = [
   ["Languages", "Java, TypeScript, JavaScript, SQL"],
   ["Backend", "Spring Boot (3/4), Spring Security, Spring Data JPA/MongoDB, Spring Modulith, Flyway, Node.js, Express, Socket.IO"],
-  ["Frontend", "React, Next.js (App Router, Server Actions), Redux Toolkit, Zustand, TanStack Query, Tailwind, MUI"],
+  ["Frontend", "React, Next.js (App Router, Server Actions), Angular, Redux Toolkit, Zustand, TanStack Query, Tailwind, MUI"],
   ["Mobile", "React Native (CLI & Expo), Expo Router, React Navigation, EAS builds"],
   ["Data", "PostgreSQL, MySQL, MongoDB, Prisma, AWS S3"],
   ["DevOps", "Docker, Caddy, AWS Lightsail, Cloudflare, GitHub Actions, Vercel, Render"],
-  ["Practices", "REST API design, JWT/OAuth2, Stripe webhooks, modular monoliths, microservices, JUnit, DSA"],
+  ["Practices", "REST API design, JWT/OAuth2, Stripe webhooks, WebSockets (STOMP, Socket.IO), modular monoliths, microservices, JUnit, Vitest, DSA"],
 ];
 
 

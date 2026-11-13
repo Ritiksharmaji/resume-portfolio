@@ -487,9 +487,10 @@
         "kind": "frontend",
         "title": "Next.js web — three areas in one app",
         "points": [
-          "Customer ordering with guest browsing, cart, checkout and live tracking",
+          "Guest browsing: menus, search and checkout are public; sign-in appears inline at checkout",
           "Partner Hub: kitchen display, menu editor, offers, hours, reviews, analytics and payouts",
-          "Dabba Control: city overview, live fleet map, disputes, surge zones, campaigns, finance and audit log"
+          "Dabba Control: city overview, live fleet map, disputes, surge zones, campaigns, finance, audit log and staff password resets",
+          "Per-role sign-in pages, branded favicon and app manifest, 404/error pages, Terms and Privacy"
         ],
         "tech": "Next.js 16 · React 19 · Tailwind 4 · React Query · Leaflet + OpenStreetMap"
       },
@@ -499,7 +500,8 @@
         "points": [
           "Two React Native CLI apps sharing types, API client, STOMP client and theme with the web",
           "Rider app: go online, accept delivery offers, pick up, confirm drop with the customer's OTP",
-          "Release APKs served from the live site; adaptive icons and launch screens"
+          "Customer app: browse as a guest, sign in from checkout, editable phone; v1.1 with adaptive icons and launch screens",
+          "Release APKs downloadable from the live site"
         ],
         "tech": "React Native 0.87 CLI · React Navigation · Firebase Auth · Google Sign-In"
       },
@@ -661,22 +663,27 @@
   {
     "slug": "job-portal",
     "code": "P/06",
-    "name": "JobHook — Job Portal",
-    "kicker": "hiring platform · api + web + mobile",
-    "tagline": "Applicants and employers on one platform: post jobs with a rich-text editor, apply with a résumé, and move candidates through an interview pipeline — on web and mobile.",
-    "problem": "Small companies need a simple way to post roles and track applicants, and candidates want to apply from their phone. JobHook covers both sides with one Spring Boot API.",
+    "name": "JobPilot AI — Job Portal",
+    "kicker": "hiring platform · 2 APIs + 3 web apps + mobile",
+    "tagline": "Applicants and employers on one platform — post jobs, apply with a résumé, run an interview pipeline. The same API is built twice (Spring Boot and Express) and serves React, Angular, Next.js and React Native clients.",
+    "problem": "Small companies need a simple way to post roles and track applicants, and candidates want to apply from any device. JobPilot AI covers both sides, live at jobpilotai.site.",
     "role": "Sole engineer",
-    "timeline": "Jun 2026 — Aug 2026 · 18 commits",
+    "timeline": "Jun 2026 — present · 34 commits",
     "platforms": "Web · iOS · Android",
     "live": "https://www.jobpilotai.site",
     "liveLabel": "jobpilotai.site",
     "source": "https://github.com/Ritiksharmaji/JOB-PORTAL-PROJECT",
     "visual": "pipeline",
     "shots": {
-      "cover": "/projects/job-portal/cover.jpg",
+      "cover": "/projects/job-portal/jobpilot-cover.jpg",
       "caption": "jobpilotai.site — live job portal",
-      "mobile": "/projects/job-portal/mobile.jpg",
-      "gallery": []
+      "mobile": "/projects/job-portal/jobpilot-mobile.jpg",
+      "gallery": [
+        {
+          "src": "/projects/job-portal/login.jpg",
+          "caption": "Sign-in — JWT auth with emailed-OTP password reset"
+        }
+      ]
     },
     "tags": [
       {
@@ -684,16 +691,32 @@
         "tone": "blue"
       },
       {
-        "label": "MongoDB",
+        "label": "Express 5 + TS",
+        "tone": "blue"
+      },
+      {
+        "label": "MongoDB Atlas",
         "tone": "grey"
       },
       {
-        "label": "React + TS",
+        "label": "React",
+        "tone": "lime"
+      },
+      {
+        "label": "Angular 21",
+        "tone": "lime"
+      },
+      {
+        "label": "Next.js 16",
         "tone": "lime"
       },
       {
         "label": "React Native",
         "tone": "white"
+      },
+      {
+        "label": "AWS Lightsail",
+        "tone": "grey"
       }
     ],
     "proof": [
@@ -702,68 +725,81 @@
         "label": "REST endpoints"
       },
       {
-        "value": "17",
-        "label": "screens per mobile app"
+        "value": "2",
+        "label": "interchangeable backends"
       },
       {
         "value": "4",
-        "label": "pipeline stages"
+        "label": "client apps (3 web + mobile)"
       },
       {
-        "value": "5 min",
-        "label": "OTP expiry, auto-purged"
+        "value": "17",
+        "label": "screens per mobile app"
       }
     ],
     "layers": [
       {
         "kind": "backend",
-        "title": "Spring Boot API",
+        "title": "Spring Boot API (live)",
         "points": [
-          "BCrypt + JWT login with account type in the token claims",
+          "BCrypt + JWT (HS512) login with account type in the token claims",
           "Password reset by emailed OTP; a scheduled job purges OTPs older than 5 minutes",
-          "Applicant pipeline: Applied → Interviewing → Offered / Rejected, with interview times",
-          "In-app notifications when jobs are posted or interviews scheduled"
+          "Applicant pipeline: Applied → Interviewing → Offered / Rejected, with interview times and notifications",
+          "Multi-stage Docker build, deployed to AWS Lightsail behind Caddy HTTPS at jobs-api.onekampus.com"
         ],
-        "tech": "Spring Boot 3.3 · Spring Security · Spring Data MongoDB · JavaMail · Docker"
+        "tech": "Java 17 · Spring Boot 3.3 · Spring Security · Spring Data MongoDB · JavaMail · Docker"
+      },
+      {
+        "kind": "backend",
+        "title": "Express API (drop-in twin)",
+        "points": [
+          "Same endpoints, JSON and error format — every frontend works with either backend unchanged",
+          "Same collections, JWTs and password hashes, so both can run against one database",
+          "Hardened: verified-OTP resets, ownership and role checks, identity from the token, applicant privacy",
+          "Rate limiting, helmet headers, pino logs; 19 Vitest + Supertest tests"
+        ],
+        "tech": "Node.js · Express 5 · TypeScript · Mongoose 9 · Zod 4 · Vitest · Supertest"
       },
       {
         "kind": "frontend",
-        "title": "React web app",
+        "title": "Three web clients",
         "points": [
-          "Employer job editor with Tiptap rich text and drafts",
-          "Find Jobs / Find Talent with filters and sorting",
-          "Axios interceptor attaches tokens and logs out on 401"
+          "React app (the live site): Tiptap job editor with drafts, Find Jobs / Find Talent filters, profiles",
+          "Angular 21 and Next.js 16 versions of the same product on the same API",
+          "Axios interceptor attaches tokens and signs out on 401"
         ],
-        "tech": "React 18 · TypeScript · Redux Toolkit · Mantine · Tiptap"
+        "tech": "React 18 · Redux Toolkit · Mantine · Angular 21 · Next.js 16"
       },
       {
         "kind": "mobile",
         "title": "React Native apps",
         "points": [
-          "17 screens, résumé upload with the document picker",
+          "17 screens with résumé upload through the document picker",
           "Built in Expo, then ported to a bare React Native CLI app"
         ],
-        "tech": "Expo 51 · React Native CLI · React Navigation 6"
+        "tech": "Expo · React Native CLI · React Navigation"
       }
     ],
     "decisions": [
       {
+        "title": "One API contract, two implementations",
+        "body": "Rebuilding the API in Express with identical endpoints, tokens and documents proves the contract — any client can switch backends by changing one URL."
+      },
+      {
+        "title": "Security fixed in the rewrite",
+        "body": "The Express version closes gaps in the original: password reset now needs a verified OTP, and role and ownership checks happen on the server, not just in the UI."
+      },
+      {
         "title": "Applicants embedded in the job",
-        "body": "Embedding applications in the Job document keeps reads to one query. Documents grow with applicants, so history uses a nested query."
-      },
-      {
-        "title": "Files stored in MongoDB",
-        "body": "Résumés and photos live as binary in Mongo: zero extra infrastructure, bounded by the 16 MB document limit. Object storage is the next step."
-      },
-      {
-        "title": "Feature branches into develop",
-        "body": "Work flowed through feature branches into develop into main, across 6 merged pull requests."
+        "body": "Embedding applications in the Job document keeps reads to one query; documents grow with applicants, so history uses a nested query."
       }
     ],
     "apiChip": "PUT /jobs/changeAppStatus → 200",
     "resumeBullets": [
-      "Spring Boot 3 + MongoDB API (19 endpoints) with JWT auth, emailed-OTP password reset and an applicant pipeline; React/TS web app and 17-screen React Native app."
-    ]
+      "Built a job portal (live at jobpilotai.site) with a Spring Boot + MongoDB API — JWT auth, emailed-OTP password reset, applicant pipeline — and React, Angular, Next.js and React Native clients.",
+      "Re-implemented the same 19-endpoint API in Express 5 + TypeScript as a drop-in twin with stricter security and 19 Vitest/Supertest tests; deployed with Docker and Caddy on AWS Lightsail."
+    ],
+    "note": "“JobPilot AI” is the product's brand name — the code has no AI/LLM features. The live site runs the Spring Boot API; the Express API is a drop-in replacement tested against the same database."
   },
   {
     "slug": "seed-grant",
