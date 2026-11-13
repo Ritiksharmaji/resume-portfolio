@@ -1,18 +1,14 @@
-// Sync one project's portfolio content from its repository.
+// Sync one project's portfolio content from its repository. No AI, no paid services.
 //
-//   npx tsx scripts/sync/sync.ts --repo Ritiksharmaji/dabba-platform --dir ../dabba-platform \
+//   npx tsx scripts/sync/sync.mts --repo Ritiksharmaji/dabba-platform --dir ../dabba-platform \
 //        [--after <sha>] [--before <sha>] [--dry-run]
 //
-// 1. Counts facts from the checked-out code (scripts/sync/count.ts) — no AI.
-// 2. Collects what changed since the last synced commit (data/sync-state.json).
-// 3. Asks Claude to rewrite that project's text in data/projects.json and write a
-//    "What's new" entry, under the honesty rules below.
-// 4. Validates: numbers must come from the counted facts; fixed fields are never touched.
-import Anthropic from "@anthropic-ai/sdk";
-import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
-import { z } from "zod/v4";
+// 1. Counts facts from the checked-out code (scripts/sync/count.ts).
+// 2. Updates the project's numbers ("proof") and timeline from those facts.
+// 3. Builds a "What's new" entry from the merge / commit titles on main since the last sync.
+// Descriptions, feature bullets and résumé lines are left as written by hand.
 import { execFileSync } from "node:child_process";
-import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { countRepo, type Facts } from "./count";
 
@@ -22,7 +18,7 @@ const readJson = <T,>(f: string): T => JSON.parse(readFileSync(DATA(f), "utf8"))
 const writeJson = (f: string, v: unknown) => writeFileSync(DATA(f), JSON.stringify(v, null, 2) + "\n");
 
 type Proof = { value: string; label: string };
-type Project = Record<string, unknown> & { slug: string; name: string; proof: Proof[] };
+type Project = Record<string, unknown> & { slug: string; name: string; proof: Proof[]; timeline: string };
 type Config = { projects: { repo: string; slug: string; branch: string }[] };
 type State = Record<string, { slug: string; lastSha: string; syncedAt: string }>;
 type Entry = { date: string; sha: string; title: string; points: string[] };
@@ -58,133 +54,43 @@ const after = arg("after") || git("rev-parse", "HEAD");
 const afterShort = after.slice(0, 9);
 let before = arg("before") || state[target.repo]?.lastSha || "";
 if (before && /^0+$/.test(before)) before = "";
-if (before && !git("cat-file", "-t", before)) before = ""; // not in history (force-push / shallow)
+if (before && !git("cat-file", "-t", before)) before = ""; // not in history (force-push / shallow clone)
 if (before && before === after) {
   console.log(`Already synced at ${afterShort}.`);
   process.exit(0);
 }
 
-// ---------- evidence ----------
-const facts: Facts = countRepo(dir);
-const range = before ? `${before}..${after}` : after;
-const logArgs = before ? [range] : [after, "-n", "40"];
-const commitLog = git("log", "--no-merges", "--format=- %cs %s%n%b", ...logArgs).replace(/\n{2,}/g, "\n").slice(0, 20_000);
-const mergeLog = git("log", "--merges", "--format=- %cs %s", ...logArgs).slice(0, 6_000);
-const diffstat = before ? git("diff", "--stat=160", range).split("\n").slice(-120).join("\n") : "";
-const NOISE = [":(exclude)*.lock", ":(exclude)*package-lock.json", ":(exclude)*.png", ":(exclude)*.jpg", ":(exclude)*.svg", ":(exclude)**/android/**", ":(exclude)**/ios/**"];
-const diff = before ? git("diff", "--unified=1", range, "--", ".", ...NOISE).slice(0, 140_000) : "";
-const readme = ["README.md", "readme.md"].map((f) => path.join(dir, f)).find(existsSync);
-const readmeText = readme ? readFileSync(readme, "utf8").slice(0, 10_000) : "";
-
 const projects = readJson<Project[]>("projects.json");
 const idx = projects.findIndex((p) => p.slug === target.slug);
 if (idx < 0) throw new Error(`No project with slug "${target.slug}" in data/projects.json`);
 const current = projects[idx];
+const facts: Facts = countRepo(dir);
 
-// Only these fields may change. Everything else (name, links, screenshots, badges, honesty notes) is fixed.
-const EDITABLE = ["tagline", "problem", "platforms", "tags", "proof", "layers", "decisions", "resumeBullets"] as const;
-const editableNow = Object.fromEntries(EDITABLE.map((k) => [k, current[k]]));
-
-// ---------- Claude ----------
-const Tone = z.enum(["lime", "blue", "white", "grey"]);
-const Output = z.object({
-  contentChanged: z.boolean().describe("true if the portfolio text should change because of these commits"),
-  whatsNew: z
-    .object({
-      title: z.string().describe("Short headline of what shipped, under 70 characters"),
-      points: z.array(z.string()).describe("2-4 bullets, each one concrete shipped change, under 140 characters"),
-    })
-    .nullable()
-    .describe("null when the commits are only chores (formatting, deps, typos, CI)"),
-  update: z.object({
-    tagline: z.string(),
-    problem: z.string(),
-    platforms: z.string(),
-    tags: z.array(z.object({ label: z.string(), tone: Tone })),
-    proof: z.array(z.object({ value: z.string(), label: z.string() })),
-    layers: z.array(
-      z.object({
-        kind: z.enum(["backend", "frontend", "mobile", "infra"]),
-        title: z.string(),
-        points: z.array(z.string()),
-        tech: z.string(),
-      }),
-    ),
-    decisions: z.array(z.object({ title: z.string(), body: z.string() })),
-    resumeBullets: z.array(z.string()),
-  }),
-});
-
-const SYSTEM = `You maintain one project's entry on a software engineer's portfolio (Ritik Sharma — full-stack: Spring Boot, Express, Next.js, React Native).
-A recruiter and an engineering manager will read it. They may open the repository to check claims, so accuracy beats hype.
-
-Rules:
-- Only claim what the code, commits or README show. Never invent users, traffic, revenue, ratings, team size or performance numbers.
-- Every number you write in "proof" must be one of the counted facts given to you (or unchanged from the current entry). Do not round up or add "+".
-- Keep the current entry's voice and structure. Change only what the new commits actually affect; keep good existing text verbatim.
-- Never claim technology that is not in the code (for example AWS, AI/LLM, Kafka, Kubernetes, microservices) — if the current text claims something the code no longer shows, remove it.
-- Plain, specific English. No buzzwords ("cutting-edge", "seamless", "robust", "leveraged"), no emoji.
-- Lengths: tagline under 230 characters; problem 1-2 sentences; 3-5 points per layer, each under 150 characters; 2-4 proof items; 3 decisions (decision + trade-off); 1-2 resumeBullets under 260 characters each, starting with a past-tense verb.
-- tags: 4-7 key technologies, tone "blue" for backend, "lime" for web/frontend, "white" for mobile, "grey" for data/infra.
-- "whatsNew" describes what shipped in THESE commits for a reader of the site, not a list of file names.
-- If the commits are only chores, set contentChanged=false, whatsNew=null and return the current entry unchanged.`;
-
-const client = new Anthropic();
-const userText = [
-  `Project: ${current.name} (${target.repo}, branch ${target.branch}).`,
-  `Synced commit range: ${before ? `${before.slice(0, 9)}..${afterShort}` : `first sync, up to ${afterShort}`}.`,
-  `\n## Counted facts (the only numbers you may use)\n${JSON.stringify(facts, null, 2)}`,
-  `\n## Current portfolio entry (editable fields)\n${JSON.stringify(editableNow, null, 2)}`,
-  `\n## Fixed context you must stay consistent with\n${JSON.stringify({ name: current.name, kicker: current.kicker, badge: current.badge, note: current.note, live: current.live }, null, 2)}`,
-  `\n## Merges in range\n${mergeLog || "(none)"}`,
-  `\n## Commits in range\n${commitLog || "(none)"}`,
-  diffstat && `\n## Diffstat\n${diffstat}`,
-  diff && `\n## Diff (truncated)\n${diff}`,
-  readmeText && `\n## README (truncated)\n${readmeText}`,
-]
-  .filter(Boolean)
-  .join("\n");
-
-async function ask() {
-  // Test hook: SYNC_MOCK_FILE=answer.json runs validation and writing without calling the API.
-  if (process.env.SYNC_MOCK_FILE) return Output.parse(JSON.parse(readFileSync(process.env.SYNC_MOCK_FILE, "utf8")));
-  try {
-    const res = await client.beta.messages.parse({
-      model: "claude-opus-5-5",
-      max_tokens: 16000,
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      output_config: { effort: "high", format: betaZodOutputFormat(Output) },
-      system: SYSTEM,
-      messages: [{ role: "user", content: userText }],
-    });
-    if (res.stop_reason === "refusal") throw new Error(`Model declined: ${res.stop_details?.explanation ?? "no details"}`);
-    if (res.stop_reason === "max_tokens") throw new Error("Model output was cut off (max_tokens).");
-    if (!res.parsed_output) throw new Error("Model output did not match the schema.");
-    console.log(`Claude: ${res.usage.input_tokens} in / ${res.usage.output_tokens} out tokens (${res.model}).`);
-    return res.parsed_output;
-  } catch (err) {
-    if (err instanceof Anthropic.AuthenticationError) throw new Error("ANTHROPIC_API_KEY is missing or invalid.");
-    if (err instanceof Anthropic.RateLimitError) throw new Error("Rate limited by the Claude API — re-run the workflow later.");
-    throw err;
+// ---------- 1. numbers ----------
+// Each proof label is matched to the counted fact it describes. Labels with no
+// matching fact (e.g. "backend modules", "pipeline stages") are left alone.
+const num = (k: string) => (typeof facts[k] === "number" ? (facts[k] as number) : undefined);
+const RULES: [RegExp, () => string | undefined][] = [
+  [/^REST endpoints$/i, () => String(num("springEndpoints") ?? num("expressRoutes") ?? "") || undefined],
+  [/^JPA entities$/i, () => num("jpaEntities")?.toString()],
+  [/^(Mongo(DB)? )?(collections|documents|data models)$/i, () => num("mongoDocuments")?.toString()],
+  [/^Prisma models$/i, () => undefined],
+  [/^web pages \+ mobile screens$/i, () => (num("nextPages") && num("mobileScreens") ? `${num("nextPages")} + ${num("mobileScreens")}` : undefined)],
+  [/^mobile screens \+ web pages$/i, () => (num("mobileScreens") && num("nextPages") ? `${num("mobileScreens")} + ${num("nextPages")}` : undefined)],
+  [/^(mobile screens|screens per mobile app)$/i, () => num("mobileScreens")?.toString()],
+  [/^web pages$/i, () => num("nextPages")?.toString()],
+  [/^Flyway migrations$/i, () => num("flywayMigrations")?.toString()],
+];
+const numberChanges: string[] = [];
+const proof = current.proof.map((p) => {
+  const rule = RULES.find(([re]) => re.test(p.label.trim()));
+  const value = rule?.[1]();
+  if (value && value !== p.value) {
+    numberChanges.push(`${p.label}: ${p.value} → ${value}`);
+    return { ...p, value };
   }
-}
-
-// ---------- validation ----------
-const numbersIn = (s: string) => (s.match(/\d+(?:\.\d+)?/g) ?? []).map(Number);
-const allowed = new Set<number>([
-  ...Object.values(facts).flatMap((v) => (typeof v === "number" ? [v] : [])),
-  ...current.proof.flatMap((p) => numbersIn(p.value)),
-]);
-function checkProof(next: Proof[]): { proof: Proof[]; dropped: string[] } {
-  const dropped: string[] = [];
-  const proof = next.filter((p) => {
-    const ok = numbersIn(p.value).every((n) => allowed.has(n));
-    if (!ok) dropped.push(`${p.value} ${p.label}`);
-    return ok && p.value.trim() && p.label.trim();
-  });
-  return { proof: proof.length >= 2 ? proof.slice(0, 4) : current.proof, dropped };
-}
+  return p;
+});
 
 const month = (d: string) =>
   d ? new Date(`${d}T00:00:00Z`).toLocaleString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" }) : "";
@@ -192,39 +98,97 @@ function timeline(): string {
   const first = String(facts.firstCommit ?? ""), last = String(facts.lastCommit ?? "");
   const recent = last && Date.now() - Date.parse(last) < 45 * 86_400_000;
   const span = first ? `${month(first)} — ${recent ? "present" : month(last)}` : "";
-  return [span, facts.commits ? `${facts.commits} commits` : ""].filter(Boolean).join(" · ") || String(current.timeline);
+  return [span, facts.commits ? `${facts.commits} commits` : ""].filter(Boolean).join(" · ") || current.timeline;
 }
 
-// ---------- run ----------
-const out = await ask();
-const notes: string[] = [];
-const nextProject: Project = { ...current, timeline: timeline() };
-if (out.contentChanged) {
-  const { proof, dropped } = checkProof(out.update.proof);
-  if (dropped.length) notes.push(`Dropped proof items with numbers not found in the code: ${dropped.join("; ")}`);
-  Object.assign(nextProject, { ...out.update, proof });
-  if (!out.update.resumeBullets.length) delete nextProject.resumeBullets;
+// ---------- 2. What's new, from merge / commit titles on main ----------
+const NOISE = /^(wip|chore|ci|build|style|bump|deps?|lint|format|typo|fix typo|update readme|readme|merge branch '|merge remote|initial commit|revert|test commit|temp)/i;
+// Internal tweaks a site visitor shouldn't read about.
+const INTERNAL = /\b(local ?(url|host)|localhost|\.env|env file|api url|base url|gitignore|lockfile|console\.log|debug|todo)\b/i;
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const clean = (s: string) => cap(s.trim().replace(/\s+/g, " ").replace(/[.;]+$/, "")).slice(0, 140);
+
+function itemsFromCommit(subject: string, body: string): string[] {
+  // "Merge development into main: a, b, c"  →  a / b / c
+  const intoMain = subject.match(/^Merge .+? into (?:main|master)\s*[:—-]\s*(.+)$/i);
+  if (intoMain) return intoMain[1].split(/,\s+|;\s+/).map(clean).filter(Boolean);
+  // "Merge pull request #12 from user/branch" + body "PR title"
+  const pr = subject.match(/^Merge pull request #\d+ from [^/]+\/(.+)$/i);
+  if (pr) {
+    const title = body.split("\n").map((l) => l.trim()).find((l) => l && !/^co-authored-by:/i.test(l));
+    // Only a real PR title counts; branch names ("development-branch-frontend-work") are not release notes.
+    return title && !/^(development|main|dev|master)$/i.test(title) ? [clean(title)] : [];
+  }
+  if (/^Merge /i.test(subject)) return [];
+  return NOISE.test(subject) ? [] : [clean(subject.replace(/^(feat|fix|refactor|perf|docs)(\(.+?\))?!?:\s*/i, ""))];
 }
+
+const SEP = "\u001f", END = "\u001e";
+const logRange = before ? [`${before}..${after}`] : [after, "-n", "30"];
+const raw = git("log", "--first-parent", `--format=%H${SEP}%cs${SEP}%P${SEP}%s${SEP}%b${END}`, ...logRange);
+const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+const titleFor = (pts: string[]) =>
+  pts.length === 1 ? pts[0] : pts.length === 2 ? `${pts[0]} and ${lower(pts[1])}` : `${pts[0]}, ${lower(pts[1])} and ${pts.length - 2} more`;
+const keep = (list: string[]) => {
+  const out: string[] = [];
+  for (const it of list) {
+    if (INTERNAL.test(it) || it.length < 4) continue;
+    if (!out.some((x) => x.toLowerCase() === it.toLowerCase())) out.push(it);
+  }
+  return out;
+};
+const toEntry = (sha: string, date: string, items: string[]): Entry => ({
+  date,
+  sha: sha.slice(0, 9),
+  title: titleFor(items),
+  points: items.length === 1 ? [] : items.slice(0, 10),
+});
+
+// One entry per merge into main (newest first); direct commits are grouped into one entry.
+const newEntries: Entry[] = [];
+let loose: { sha: string; date: string; items: string[] } | null = null;
+for (const rec of raw.split(END)) {
+  const [sha = "", date = "", parents = "", subject = "", body = ""] = rec.trim().split(SEP);
+  if (!sha) continue;
+  const items = keep(itemsFromCommit(subject, body));
+  if (!items.length) continue;
+  if (parents.trim().includes(" ")) newEntries.push(toEntry(sha, date, items));
+  else if (loose) loose.items.push(...items);
+  else loose = { sha, date, items: [...items] };
+}
+if (loose) {
+  const items = keep(loose.items);
+  const entry = toEntry(loose.sha, loose.date, items);
+  const at = newEntries.findIndex((e) => e.date < loose!.date);
+  newEntries.splice(at < 0 ? newEntries.length : at, 0, entry);
+}
+// First sync: show only the most recent few releases, not the whole history.
+const whatsNewList = before ? newEntries : newEntries.slice(0, 4);
+
+// ---------- write ----------
+const nextProject: Project = { ...current, proof, timeline: timeline() };
 projects[idx] = nextProject;
 
 const changelog = readJson<Record<string, Entry[]>>("changelog.json");
-if (out.whatsNew && out.whatsNew.points.length) {
-  const entry: Entry = { date: new Date().toISOString().slice(0, 10), sha: afterShort, title: out.whatsNew.title, points: out.whatsNew.points.slice(0, 4) };
-  changelog[target.slug] = [entry, ...(changelog[target.slug] ?? []).filter((e) => e.sha !== afterShort)].slice(0, 12);
+if (whatsNewList.length) {
+  const shas = new Set(whatsNewList.map((e) => e.sha));
+  changelog[target.slug] = [...whatsNewList, ...(changelog[target.slug] ?? []).filter((e) => !shas.has(e.sha))].slice(0, 12);
 }
 state[target.repo] = { slug: target.slug, lastSha: after, syncedAt: new Date().toISOString() };
 
 const summary = [
   `### ${current.name} synced to \`${afterShort}\``,
-  out.whatsNew ? `**${out.whatsNew.title}**\n${out.whatsNew.points.map((p) => `- ${p}`).join("\n")}` : "_Only chores in this range — no What's new entry._",
-  `Content changed: **${out.contentChanged ? "yes" : "no"}** · timeline: ${nextProject.timeline}`,
-  `Proof: ${(nextProject.proof as Proof[]).map((p) => `${p.value} ${p.label}`).join(" · ")}`,
+  whatsNewList.length
+    ? whatsNewList.map((e) => `**${e.date} — ${e.title}**${e.points.length ? "\n" + e.points.map((p) => `- ${p}`).join("\n") : ""}`).join("\n\n")
+    : "_No user-facing merge or commit titles in this range — no What's new entry._",
+  numberChanges.length ? `Numbers updated: ${numberChanges.join(" · ")}` : "Numbers unchanged.",
+  `Timeline: ${nextProject.timeline}`,
   `Counted facts: \`${JSON.stringify(facts)}\``,
-  ...notes.map((n) => `> ${n}`),
+  "Descriptions and feature bullets are not changed automatically — edit data/projects.json when a project gains a big new feature.",
 ].join("\n\n");
 
 if (dryRun) {
-  console.log(JSON.stringify({ project: nextProject, whatsNew: out.whatsNew }, null, 2));
+  console.log(JSON.stringify({ proof, timeline: nextProject.timeline, whatsNew: whatsNewList }, null, 2));
 } else {
   writeJson("projects.json", projects);
   writeJson("changelog.json", changelog);

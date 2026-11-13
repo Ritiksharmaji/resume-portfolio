@@ -59,10 +59,9 @@ jobs:
           path: .project-src
           fetch-depth: 0
 
-      - name: Summarize changes and update content
+      # No AI and no paid services: counts come from the code, "What's new" from merge titles.
+      - name: Update numbers and What's new
         if: steps.cfg.outputs.skip != 'true'
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           after=$(git -C .project-src rev-parse HEAD)
           npx tsx scripts/sync/sync.mts --repo "$REPO" --dir .project-src --after "$after" ${BEFORE:+--before "$BEFORE"}

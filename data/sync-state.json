@@ -1,1 +1,12 @@
-{}
+{
+  "Ritiksharmaji/dabba-platform": {
+    "slug": "dabba",
+    "lastSha": "b6e3539129131f2f51f93ccc818e82bf1b6b0586",
+    "syncedAt": "2026-11-13T22:20:05.656Z"
+  },
+  "Ritiksharmaji/JOB-PORTAL-PROJECT": {
+    "slug": "job-portal",
+    "lastSha": "1d93dd4ea0fc30097d77f88bb4de0a3105cac952",
+    "syncedAt": "2026-11-13T22:20:06.228Z"
+  }
+}

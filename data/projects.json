@@ -666,7 +666,7 @@
     "tagline": "Applicants and employers on one platform: post jobs with a rich-text editor, apply with a résumé, and move candidates through an interview pipeline — on web and mobile.",
     "problem": "Small companies need a simple way to post roles and track applicants, and candidates want to apply from their phone. JobHook covers both sides with one Spring Boot API.",
     "role": "Sole engineer",
-    "timeline": "Feb — Aug 2026 · 6 merged PRs",
+    "timeline": "Jun 2026 — Aug 2026 · 18 commits",
     "platforms": "Web · iOS · Android",
     "live": "https://www.jobpilotai.site",
     "liveLabel": "jobpilotai.site",

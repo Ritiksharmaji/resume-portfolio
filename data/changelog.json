@@ -1,1 +1,48 @@
-{}
+{
+  "dabba": [
+    {
+      "date": "2026-11-14",
+      "sha": "b6e353912",
+      "title": "Logo and app icons, launch screens and 7 more",
+      "points": [
+        "Logo and app icons",
+        "Launch screens",
+        "Favicon/manifest",
+        "Page titles",
+        "404/error pages",
+        "Terms/Privacy",
+        "Password resets",
+        "Editable phone",
+        "App 1.1"
+      ]
+    },
+    {
+      "date": "2026-11-14",
+      "sha": "bc7267588",
+      "title": "Guest browsing (web + app) and sign-in at checkout",
+      "points": [
+        "Guest browsing (web + app)",
+        "Sign-in at checkout"
+      ]
+    },
+    {
+      "date": "2026-11-13",
+      "sha": "8899d63fe",
+      "title": "Home page is the customer sign-in",
+      "points": []
+    },
+    {
+      "date": "2026-11-13",
+      "sha": "f995d7f2b",
+      "title": "Per-role sign-in URLs, phone pop-up + checkout highlight and 4 more",
+      "points": [
+        "Per-role sign-in URLs",
+        "Phone pop-up + checkout highlight",
+        "Rider password reset in console",
+        "APK downloads",
+        "Health fix",
+        "Five flow guides"
+      ]
+    }
+  ]
+}
