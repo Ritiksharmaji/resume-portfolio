@@ -1,19 +1,12 @@
-# Updates a project's portfolio content when its repo merges to main.
-# Triggered by scripts/sync/templates/notify-portfolio.yml in each project repo,
-# or by hand from the Actions tab (Run workflow).
+# Applies a project's numbers and "What's new" to the portfolio.
+# Triggered by scripts/sync/templates/notify-portfolio.yml in each project repo, which
+# counts facts in its own repo and sends them here — this workflow never reads project code.
+# To re-run by hand: open the project repo → Actions → Notify portfolio → Run workflow.
 name: Sync project
 
 on:
   repository_dispatch:
     types: [project-updated]
-  workflow_dispatch:
-    inputs:
-      repo:
-        description: "Project repo, e.g. Ritiksharmaji/dabba-platform"
-        required: true
-      after:
-        description: "Commit to sync to (blank = latest on its main branch)"
-        required: false
 
 # One sync at a time, so two merges never edit projects.json at once.
 concurrency:
@@ -27,11 +20,9 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     env:
-      REPO: ${{ github.event.client_payload.repo || inputs.repo }}
-      AFTER: ${{ github.event.client_payload.after || inputs.after }}
-      BEFORE: ${{ github.event.client_payload.before }}
+      REPO: ${{ github.event.client_payload.repo }}
     steps:
       - uses: actions/checkout@v5
 
@@ -42,43 +33,19 @@ jobs:
 
       - run: npm ci
 
-      - name: Look up the project in sync-config.json
-        id: cfg
-        run: |
-          branch=$(node -e "const c=require('./data/sync-config.json');const p=c.projects.find(p=>p.repo.toLowerCase()===process.env.REPO.toLowerCase());if(p)console.log(p.branch)")
-          if [ -z "$branch" ]; then echo "::notice::$REPO is not in data/sync-config.json — skipping."; echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0; fi
-          echo "branch=$branch" >> "$GITHUB_OUTPUT"
-
-      - name: Check out the project repo
-        if: steps.cfg.outputs.skip != 'true'
-        uses: actions/checkout@v5
-        with:
-          repository: ${{ env.REPO }}
-          ref: ${{ env.AFTER || steps.cfg.outputs.branch }}
-          token: ${{ secrets.SOURCE_REPO_TOKEN }}
-          path: .project-src
-          fetch-depth: 0
-
       # No AI and no paid services: counts come from the code, "What's new" from merge titles.
       - name: Update numbers and What's new
-        if: steps.cfg.outputs.skip != 'true'
-        run: |
-          after=$(git -C .project-src rev-parse HEAD)
-          npx tsx scripts/sync/sync.mts --repo "$REPO" --dir .project-src --after "$after" ${BEFORE:+--before "$BEFORE"}
-          rm -rf .project-src
+        run: npx tsx scripts/sync/apply.mts --event "$GITHUB_EVENT_PATH"
 
       - name: Build the site with the new content
-        if: steps.cfg.outputs.skip != 'true'
         run: npm run build
 
       - name: Publish (pull request, merged once the build has passed)
-        if: steps.cfg.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           if git diff --quiet -- data; then echo "Nothing changed."; exit 0; fi
-          slug=$(node -e "const s=require('./data/sync-state.json');console.log(s[Object.keys(s).find(k=>k.toLowerCase()===process.env.REPO.toLowerCase())].slug)")
-          sha=$(node -e "const s=require('./data/sync-state.json');console.log(s[Object.keys(s).find(k=>k.toLowerCase()===process.env.REPO.toLowerCase())].lastSha.slice(0,9))")
+          read -r slug sha < <(node -e "const s=require('./data/sync-state.json');const k=Object.keys(s).find(k=>k.toLowerCase()===process.env.REPO.toLowerCase());console.log(s[k].slug, s[k].lastSha.slice(0,9))")
           branch="sync/$slug-$sha"
           git config user.name "portfolio-sync[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

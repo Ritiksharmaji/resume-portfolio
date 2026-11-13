@@ -26,17 +26,20 @@ Every number on the site was counted from the repositories (controllers, entitie
 
 ## Auto-update from project repos (free, no AI)
 
-When a configured project repo merges to `main`, its `Notify portfolio` workflow pings this repo and
-`.github/workflows/sync-project.yml` runs `scripts/sync/sync.mts`:
+When a configured project repo pushes to `main`, its **Notify portfolio** workflow
+(`scripts/sync/templates/notify-portfolio.yml`) runs *in that repo*: it clones this public repo for
+`scripts/sync/collect.mts`, counts facts in its own code and turns merge titles into "What's new"
+entries, then sends that small payload here. `.github/workflows/sync-project.yml` applies it with
+`scripts/sync/apply.mts`, builds, and publishes through a self-merging pull request; Vercel redeploys.
 
-- **Numbers** (endpoints, entities, pages, screens, commits, timeline) are recounted from the code by `scripts/sync/count.ts`.
-- **What's new** entries on the case study come from the merge titles on `main` — so write merge/PR titles as release notes,
-  e.g. `Merge development into main: guest browsing, sign-in at checkout`.
-- Descriptions and feature bullets are never changed automatically; edit `data/projects.json` for big new features.
-- The result is published through a pull request that merges itself after `npm run build` passes, then Vercel redeploys.
+- **Numbers** (endpoints, entities, pages, screens, commits, timeline) come from `scripts/sync/count.ts`.
+- **What's new** comes from merge titles on `main`, so write them as release notes, e.g.
+  `Merge development into main: guest browsing, sign-in at checkout`.
+- Descriptions and feature bullets are never changed automatically; edit `data/projects.json` for big features.
 
-Setup per project: add it to `data/sync-config.json`, copy `scripts/sync/templates/notify-portfolio.yml` into the project repo,
-and add the secret `PORTFOLIO_DISPATCH_TOKEN` there. This repo needs `SOURCE_REPO_TOKEN` (read access to the project repos)
-and the setting *Actions → General → Allow GitHub Actions to create and approve pull requests*.
+Add a project: add it to `data/sync-config.json`, copy the notify template to `.github/workflows/` in that repo,
+and add the secret `PORTFOLIO_DISPATCH_TOKEN` there (fine-grained token, `resume-portfolio` only, Contents read/write).
+This repo needs the setting *Actions → General → Allow GitHub Actions to create and approve pull requests*.
+Re-run by hand from the project repo: Actions → Notify portfolio → Run workflow.
 
 Run locally: `npx tsx scripts/sync/sync.mts --repo Ritiksharmaji/dabba-platform --dir ../dabba-platform --dry-run`
