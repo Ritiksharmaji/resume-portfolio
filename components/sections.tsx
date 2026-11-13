@@ -141,12 +141,12 @@ export function Marquee() {
 export function About() {
   return (
     <section id="about" className="wrap about">
-      <div className="portrait-wrap" role="img" aria-label="Portrait card of Ritik Sharma">
+      <div className="portrait-wrap" aria-label="Portrait card of Ritik Sharma">
         <div className="portrait">
           <div style={{ position: "absolute", inset: 0, borderRadius: 28, border: "1.5px solid var(--lime)", transform: "translateZ(-60px) translate(28px, 28px)" }} />
           <div style={{ position: "absolute", inset: 0, borderRadius: 28, background: "var(--panel)", border: "1px solid rgba(255,255,255,.14)", boxShadow: "40px 60px 90px rgba(0,0,0,.6)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ flex: 1, position: "relative" }}>
-              <Image src={profile.photo} alt="" fill sizes="360px" style={{ objectFit: "cover" }} priority={false} />
+              <Image src={profile.photo} alt="Ritik Sharma" fill sizes="(max-width: 760px) 280px, 360px" style={{ objectFit: "cover", objectPosition: "50% 18%" }} />
             </div>
             <div style={{ padding: "20px 24px", borderTop: "1px solid rgba(255,255,255,.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ display: "flex", flexDirection: "column", gap: 4 }}>

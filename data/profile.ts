@@ -11,7 +11,7 @@ export const profile = {
   status: "Open to work",
   email: "ritiksharma555598@gmail.com",
   phone: "+91-8125625828",
-  photo: "/avatar.svg", // swap for /photo.jpg when you have a real photo
+  photo: "/photo.jpg",
   links: {
     github: "https://github.com/Ritiksharmaji",
     linkedin: "https://www.linkedin.com/in/ritiksharmaji/",
