@@ -32,7 +32,7 @@ export const stack: StackLayer[] = [
     kicker: "backend / node",
     blurb:
       "Lean Node.js APIs in TypeScript: real-time sockets, payments with verified webhooks, file storage and scheduled jobs.",
-    where: "Shopvra · Music app · Tomato · TaskManager",
+    where: "Shopvra · Music app · TaskManager · Tomato (lab)",
     groups: [
       { title: "Core", items: ["Node.js", "Express 4 & 5", "TypeScript", "REST", "Socket.IO"] },
       { title: "Data", items: ["MongoDB", "Mongoose", "MongoDB Atlas"] },

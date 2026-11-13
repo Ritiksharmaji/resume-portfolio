@@ -1,0 +1,6 @@
+{
+  "projects": [
+    { "repo": "Ritiksharmaji/JOB-PORTAL-PROJECT", "slug": "job-portal", "branch": "main" },
+    { "repo": "Ritiksharmaji/dabba-platform", "slug": "dabba", "branch": "main" }
+  ]
+}

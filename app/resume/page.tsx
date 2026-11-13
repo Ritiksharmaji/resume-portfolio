@@ -17,31 +17,10 @@ const skills: [string, string][] = [
   ["Practices", "REST API design, JWT/OAuth2, Stripe webhooks, modular monoliths, microservices, JUnit, DSA"],
 ];
 
-const bullets: Record<string, string[]> = {
-  onekampus: [
-    "Built a Spring Boot 4 modular monolith (Spring Modulith) with 4 modules — institute management, LMS, proctored exams, hiring — 387 REST endpoints and 108 JPA entities, one Postgres schema per module.",
-    "Shipped a Next.js web app (65 pages) and React Native app (31 screens) on one SSO token; Stripe checkout with signed webhooks, WebRTC interviews, CI to Docker on Lightsail.",
-  ],
-  "site-auto-matrix": [
-    "Multi-tenant Next.js 15 platform hosting client sites by subdomain or custom domain, with Caddy on-demand TLS and 29 website blueprints; live at sites.onekampus.com.",
-    "Role-based admin and client portals, in-browser code editor with esbuild-wasm preview, GitHub-webhook deploys with rollback, WhatsApp/email enquiry alerts.",
-  ],
-  "music-app": [
-    "Extended an open-source music app: built the full React Native player, real-time presence and chat (Socket.IO), S3 streaming via presigned URLs, and JWT auth.",
-    "Self-hosted API, web and admin on three subdomains (Docker, Caddy, Lightsail) with a 24-hour catalogue cache to stay inside YouTube API quotas.",
-  ],
-  ecommerce: [
-    "TypeScript Express 5 API (27 endpoints) serving a React web shop and Expo app with an admin console; Stripe Checkout verified by signed webhooks.",
-    "Building a Spring Boot microservices version: user, product and order services with database-per-service PostgreSQL on Docker.",
-  ],
-  "job-portal": [
-    "Spring Boot 3 + MongoDB API (19 endpoints) with JWT auth, emailed-OTP password reset and an applicant pipeline; React/TS web app and 17-screen React Native app.",
-  ],
-  "food-order": ["MERN food-delivery app with Stripe and cash-on-delivery checkout, server-side cart and a separate admin panel; deployed on Render + Vercel."],
-};
+
 
 export default function Resume() {
-  const list = projects.filter((p) => bullets[p.slug]);
+  const list = projects.filter((p) => p.resumeBullets?.length);
   return (
     <div style={{ background: "#e9eaee", minHeight: "100vh", padding: "24px 12px" }}>
       <div className="no-print" style={{ maxWidth: 820, margin: "0 auto 16px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
@@ -112,7 +91,7 @@ export default function Resume() {
               r={p.live ? <a href={p.live} style={{ color: "#1558C9" }}>{p.liveLabel}</a> : p.privateRepo ? "private repo" : ""}
             />
             <ul style={{ margin: "2px 0 0", paddingLeft: 16 }}>
-              {bullets[p.slug].map((b) => (
+              {p.resumeBullets!.map((b) => (
                 <li key={b}>{b}</li>
               ))}
             </ul>

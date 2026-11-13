@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { projects, getProject, type Layer } from "@/data/projects";
+import { projects, getProject, getChangelog, type Layer } from "@/data/projects";
+import { WhatsNew } from "@/components/whats-new";
 import { Nav } from "@/components/client";
 import { Footer } from "@/components/sections";
 import { ProjectMedia, Gallery } from "@/components/shots";
@@ -87,6 +88,8 @@ export default async function CaseStudy(props: PageProps<"/work/[slug]">) {
         </section>
 
         <Gallery p={p} />
+
+        <WhatsNew entries={getChangelog(p.slug)} repo={p.source ? p.source.replace("https://github.com/", "") : undefined} />
 
         <section className="wrap section" style={{ paddingTop: 24 }}>
           <h2 className="h2" style={{ fontSize: "clamp(32px, 4vw, 56px)" }}>What I built, layer by layer.</h2>

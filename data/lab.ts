@@ -23,6 +23,16 @@ export const lab: LabItem[] = [
     size: "wide",
   },
   {
+    name: "Tomato — Food Order",
+    repo: "Food-Order-Application",
+    category: "Web",
+    pitch: "MERN food-ordering storefront with a separate admin panel — the first version before Dabba.",
+    stack: ["Express", "MongoDB", "React + Vite", "Stripe"],
+    highlights: ["Stripe Checkout and cash on delivery", "Server-side cart, order tracking, admin menu uploads"],
+    live: "https://food-order-application-chi.vercel.app",
+    size: "normal",
+  },
+  {
     name: "Institute Manager",
     repo: "IMS-Project",
     category: "Backend",

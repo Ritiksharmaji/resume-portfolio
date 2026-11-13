@@ -1,3 +1,5 @@
+import { projects } from "./projects";
+
 // Everything personal lives here. Edit this file to update the site — no design code needed.
 
 export const profile = {
@@ -33,10 +35,14 @@ export const profile = {
 };
 
 // Hero proof strip — every number is counted from real repos.
+// Derived from data/projects.json, so the sync workflow keeps these honest.
+const maxEndpoints = Math.max(
+  ...projects.flatMap((p) => p.proof.filter((x) => /REST endpoints/i.test(x.label)).map((x) => parseInt(x.value, 10) || 0)),
+);
 export const heroStats = [
-  { value: "7", label: "products shipped end-to-end" },
-  { value: "5", label: "live in production right now" },
-  { value: "387", label: "API endpoints in my largest system" },
+  { value: String(projects.length), label: "products shipped end-to-end" },
+  { value: String(projects.filter((p) => p.live).length), label: "live in production right now" },
+  { value: String(maxEndpoints), label: "API endpoints in my largest system" },
   { value: "233", label: "GitHub contributions this year" },
 ];
 
@@ -110,7 +116,7 @@ export const achievements = [
     icon: "server",
     kicker: "Self-hosting",
     title: "Runs his own production",
-    body: "Platform and music app live on AWS Lightsail — Docker, Caddy auto-HTTPS, tuned for 1 GB boxes.",
+    body: "Website platform, Dabba and the job portal live on AWS Lightsail — Docker, Caddy auto-HTTPS, tuned for small boxes.",
     href: "https://sites.onekampus.com",
   },
   {
