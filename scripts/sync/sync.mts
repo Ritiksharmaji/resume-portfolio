@@ -104,7 +104,7 @@ function timeline(): string {
 // ---------- 2. What's new, from merge / commit titles on main ----------
 const NOISE = /^(wip|chore|ci|build|style|bump|deps?|lint|format|typo|fix typo|update readme|readme|merge branch '|merge remote|initial commit|revert|test commit|temp)/i;
 // Internal tweaks a site visitor shouldn't read about.
-const INTERNAL = /\b(local ?(url|host)|localhost|\.env|env file|api url|base url|gitignore|lockfile|console\.log|debug|todo)\b/i;
+const INTERNAL = /\b(local ?(url|host)|localhost|\.env|env file|api url|base url|gitignore|lockfile|console\.log|debug|todo|notify portfolio|github actions?|workflows?|ci)\b/i;
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const clean = (s: string) => cap(s.trim().replace(/\s+/g, " ").replace(/[.;]+$/, "")).slice(0, 140);
 
