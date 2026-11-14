@@ -339,7 +339,7 @@ const boxStyle = (s: string): React.CSSProperties => ({
   fontWeight: 600,
 });
 const principles = [
-  { t: "One API, every client", b: "Web and mobile share one contract, so both ship in parallel.", seen: "oneKampus · Shopvra · JobPilot · Music" },
+  { t: "One API, every client", b: "Web and mobile share one contract, so both ship in parallel.", seen: "oneKampus · Shopvra · oneKampus Jobs · Music" },
   { t: "Secure by default", b: "JWT with refresh, bcrypt, role guards, HMAC-verified webhooks and rate limits.", seen: "oneKampus · site-auto-matrix · Shopvra" },
   { t: "Boundaries before services", b: "Modules with their own schemas and boundary tests — split into services only when it pays.", seen: "oneKampus · Shopvra services" },
   { t: "Cheap to run", b: "Dockerised, tuned to fit 1 GB servers, deployed by CI or one script.", seen: "site-auto-matrix · Music · oneKampus" },
