@@ -49,11 +49,11 @@
     {
       "date": "2026-11-09",
       "sha": "82ab25f",
-      "title": "Moved to AWS Lightsail and rebranded to JobPilot AI",
+      "title": "Moved to AWS Lightsail and rebranded to JobPilot",
       "points": [
         "Spring Boot API deployed with Docker + Caddy HTTPS at jobs-api.onekampus.com",
         "Web app moved to the shared Lightsail server, live at jobpilotai.site",
-        "Rebranded to JobPilot AI; removed placeholder content and template links",
+        "Rebranded to JobPilot; removed placeholder content and template links",
         "Fixed broken images on case-sensitive hosting"
       ]
     },
