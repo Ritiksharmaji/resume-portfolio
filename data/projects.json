@@ -663,10 +663,10 @@
   {
     "slug": "job-portal",
     "code": "P/06",
-    "name": "JobPilot AI — Job Portal",
+    "name": "JobPilot — Job Portal",
     "kicker": "hiring platform · 2 APIs + 3 web apps + mobile",
     "tagline": "Applicants and employers on one platform — post jobs, apply with a résumé, run an interview pipeline. The same API is built twice (Spring Boot and Express) and serves React, Angular, Next.js and React Native clients.",
-    "problem": "Small companies need a simple way to post roles and track applicants, and candidates want to apply from any device. JobPilot AI covers both sides, live at jobpilotai.site.",
+    "problem": "Small companies need a simple way to post roles and track applicants, and candidates want to apply from any device. JobPilot covers both sides, live at jobpilotai.site.",
     "role": "Sole engineer",
     "timeline": "Jun 2026 — present · 34 commits",
     "platforms": "Web · iOS · Android",
@@ -799,7 +799,7 @@
       "Built a job portal (live at jobpilotai.site) with a Spring Boot + MongoDB API — JWT auth, emailed-OTP password reset, applicant pipeline — and React, Angular, Next.js and React Native clients.",
       "Re-implemented the same 19-endpoint API in Express 5 + TypeScript as a drop-in twin with stricter security and 19 Vitest/Supertest tests; deployed with Docker and Caddy on AWS Lightsail."
     ],
-    "note": "“JobPilot AI” is the product's brand name — the code has no AI/LLM features. The live site runs the Spring Boot API; the Express API is a drop-in replacement tested against the same database."
+    "note": "The live site runs the Spring Boot API; the Express API is a drop-in replacement tested against the same database."
   },
   {
     "slug": "seed-grant",
