@@ -20,7 +20,7 @@ npm run build && npm start
 | Lab (secondary projects) | `data/lab.ts` |
 | One-page printable résumé | `app/resume/page.tsx` |
 
-**Photo:** drop your photo at `public/photo.jpg` and set `photo: "/photo.jpg"` in `data/profile.ts`.
+**Photo:** drop your photo at `public/ritik-photo.jpg` and set `photo: "/ritik-photo.jpg"` in `data/profile.ts`.
 
 Every number on the site was counted from the repositories (controllers, entities, routes, screens, commits) in Nov 2026 — update them when the projects grow.
 
